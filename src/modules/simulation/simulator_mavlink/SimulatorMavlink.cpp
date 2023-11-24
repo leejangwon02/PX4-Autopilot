@@ -469,15 +469,15 @@ void SimulatorMavlink::handle_message_hil_gps(const mavlink_message_t *msg)
 #if 1
 		{
 			// hack for testing
-			aux_global_position_s aux_global_position{};
+			vehicle_global_position_s aux_global_position{};
 
 			aux_global_position.timestamp_sample = gps.timestamp;
 
-			aux_global_position.latitude = gps.latitude_deg;
-			aux_global_position.longitude = gps.longitude_deg;
-			aux_global_position.altitude_agl = gps.altitude_msl_m;
-			aux_global_position.positional_uncertainty = 0.7f;
-			aux_global_position.valid = true;
+			aux_global_position.lat = gps.latitude_deg;
+			aux_global_position.lon = gps.longitude_deg;
+			aux_global_position.alt = gps.altitude_msl_m;
+			aux_global_position.eph = gps.eph;
+			aux_global_position.epv = gps.epv;
 
 			aux_global_position.timestamp = hrt_absolute_time();
 			_aux_global_position_pub.publish(aux_global_position);

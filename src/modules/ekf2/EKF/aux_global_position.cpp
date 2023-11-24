@@ -44,20 +44,18 @@ void AuxGlobalPosition::update(Ekf &ekf, const estimator::imuSample &imu_delayed
 
 	if (_aux_global_position_sub.updated()) {
 
-		aux_global_position_s aux_global_position{};
+		vehicle_global_position_s aux_global_position{};
 		_aux_global_position_sub.copy(&aux_global_position);
 
 		const int64_t time_us = aux_global_position.timestamp_sample - static_cast<int64_t>(_param_ekf2_agp_delay.get() * 1000);
 
 		AuxGlobalPositionSample sample{};
 		sample.time_us = time_us;
-		sample.latitude = aux_global_position.latitude;
-		sample.longitude = aux_global_position.longitude;
-		sample.positional_uncertainty = aux_global_position.positional_uncertainty;
-		sample.position_valid = aux_global_position.valid;
-		sample.altitude = aux_global_position.altitude_agl;
-		sample.heading = aux_global_position.heading;
-		sample.heading_valid = aux_global_position.heading_valid;
+		sample.latitude = aux_global_position.lat;
+		sample.longitude = aux_global_position.lon;
+		sample.altitude_amsl = aux_global_position.alt;
+		sample.eph = aux_global_position.eph;
+		sample.epv = aux_global_position.epv;
 
 		_aux_global_position_buffer.push(sample);
 
@@ -81,7 +79,7 @@ void AuxGlobalPosition::update(Ekf &ekf, const estimator::imuSample &imu_delayed
 			position = ekf.global_origin().project(sample.latitude, sample.longitude);
 			//const float hgt = ekf.getEkfGlobalOriginAltitude() - (float)sample.altitude;
 			// relax the upper observation noise limit which prevents bad measurements perturbing the position estimate
-			float pos_noise = math::max(sample.positional_uncertainty, _param_ekf2_agp_noise.get());
+			float pos_noise = math::max(sample.eph, _param_ekf2_agp_noise.get());
 			const float pos_var = sq(pos_noise);
 			const Vector2f pos_obs_var(pos_var, pos_var);
 			ekf.updateHorizontalPositionAidSrcStatus(sample.time_us,
@@ -91,7 +89,7 @@ void AuxGlobalPosition::update(Ekf &ekf, const estimator::imuSample &imu_delayed
 					aid_src);
 		}
 
-		const bool starting_conditions = sample.position_valid
+		const bool starting_conditions = PX4_ISFINITE(sample.latitude) && PX4_ISFINITE(sample.longitude)
 						   && ekf.control_status_flags().yaw_align;
 		const bool continuing_conditions = starting_conditions
 						   && ekf.global_origin_valid();
@@ -109,7 +107,7 @@ void AuxGlobalPosition::update(Ekf &ekf, const estimator::imuSample &imu_delayed
 
 				} else {
 					// Try to initialize using measurement
-					if (ekf.setEkfGlobalOrigin(sample.latitude, sample.longitude, sample.altitude, sample.positional_uncertainty)) {
+					if (ekf.setEkfGlobalOrigin(sample.latitude, sample.longitude, sample.altitude_amsl, sample.eph, sample.epv)) {
 						ekf.enableControlStatusAuxGpos();
 						_state = State::active;
 					}

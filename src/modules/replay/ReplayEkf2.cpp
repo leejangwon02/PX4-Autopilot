@@ -45,13 +45,13 @@
 #include <uORB/topics/vehicle_air_data.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/sensor_gps.h>
+#include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_magnetometer.h>
 #include <uORB/topics/vehicle_optical_flow.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_odometry.h>
-#include <uORB/topics/aux_global_position.h>
 
 #include "ReplayEkf2.hpp"
 

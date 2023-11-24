@@ -52,7 +52,7 @@
 # include <uORB/PublicationMulti.hpp>
 # include <uORB/Subscription.hpp>
 # include <uORB/topics/estimator_aid_source2d.h>
-# include <uORB/topics/aux_global_position.h>
+# include <uORB/topics/vehicle_global_position.h>
 #endif // MODULE_NAME
 
 class Ekf;
@@ -80,11 +80,9 @@ private:
 		uint64_t time_us{};     ///< timestamp of the measurement (uSec)
 		double latitude{};
 		double longitude{};
-		float positional_uncertainty{}; ///< XYZ position uncertainty (m)
-		bool position_valid{false};
-		float altitude{};
-		float heading{};      ///< quaternion defining rotation from body to earth frame
-		bool heading_valid{false};
+		float altitude_amsl{};
+		float eph{};
+		float epv{};
 	};
 
 	RingBuffer<AuxGlobalPositionSample> _aux_global_position_buffer{20}; // TODO: size with _obs_buffer_length and actual publication rate
